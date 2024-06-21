@@ -41,7 +41,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Booking {
-    private int id;
+    private Long id;
     private User user;
     private Object resource; // can be Workspace or ConferenceRoom
     private LocalDateTime startTime;

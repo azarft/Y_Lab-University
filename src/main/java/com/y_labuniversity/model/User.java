@@ -36,6 +36,6 @@ import lombok.*;
 @NoArgsConstructor
 public class User {
     private String fullName;
-    private String userName;
+    private String username;
     private String password;
 }
