@@ -38,4 +38,9 @@ public class User {
     private String fullName;
     private String username;
     private String password;
+
+    @Override
+    public String toString() {
+        return this.fullName;
+    }
 }

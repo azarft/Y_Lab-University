@@ -1,11 +1,11 @@
 package com.y_labuniversity.repositories;
 
-import com.y_labuniversity.model.Booking;
+import com.y_labuniversity.model.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalTime;
+import java.util.*;
 
 /**
  * Repository class for managing bookings.
@@ -22,6 +22,17 @@ public class BookingRepository {
      */
     public Collection<Booking> getAllBookings() {
         return bookings.values();
+    }
+
+
+    public List<Booking> getBookingsForUser(User user) {
+        List<Booking> userBookings = new ArrayList<>();
+        for (Booking booking : bookings.values()) {
+            if (booking.getUser().equals(user)) {
+                userBookings.add(booking);
+            }
+        }
+        return userBookings;
     }
 
     /**
@@ -101,5 +112,111 @@ public class BookingRepository {
             throw new NullPointerException("dateTime cannot be null");
         }
         return dateTime.isBefore(LocalDateTime.now());
+    }
+
+    /**
+     * Retrieves available slots for a given date and workspace.
+     *
+     * @param date      the date for which to retrieve available slots
+     * @param workspace the workspace for which to retrieve available slots
+     * @return a list of available slots for the specified date and workspace
+     */
+    public List<Slot> getFreeSlots(LocalDate date, Workspace workspace) {
+        List<Slot> freeSlots = new ArrayList<>();
+
+        // Define the start and end time for the day
+        LocalDateTime startOfDay = date.atTime(LocalTime.of(0, 0));  // Assume booking starts at 9 AM
+        LocalDateTime endOfDay = date.atTime(LocalTime.of(23, 59));   // Assume booking ends at 6 PM
+
+        // Initialize the current start time to the beginning of the day
+        LocalDateTime currentStartTime = startOfDay;
+
+        // Sort existing bookings for the given date and workspace
+        List<Booking> bookingsForDate = new ArrayList<>();
+        for (Booking booking : bookings.values()) {
+            if (booking.getStartTime().toLocalDate().equals(date) && booking.getResource() instanceof Workspace &&
+                    ((Workspace) booking.getResource()).equals(workspace)) {
+                bookingsForDate.add(booking);
+            }
+        }
+        bookingsForDate.sort((b1, b2) -> b1.getStartTime().compareTo(b2.getStartTime()));
+
+        // Iterate through the sorted bookings to find free slots
+        for (Booking booking : bookingsForDate) {
+            LocalDateTime bookingStartTime = booking.getStartTime();
+            if (currentStartTime.isBefore(bookingStartTime)) {
+                freeSlots.add(new Slot(currentStartTime, bookingStartTime));
+            }
+            currentStartTime = booking.getEndTime();
+        }
+
+        // Check for a free slot between the last booking end time and the end of the day
+        if (currentStartTime.isBefore(endOfDay)) {
+            freeSlots.add(new Slot(currentStartTime, endOfDay));
+        }
+
+        return freeSlots;
+    }
+
+    /**
+     * Retrieves available slots for a given date and conference room.
+     *
+     * @param date           the date for which to retrieve available slots
+     * @param conferenceRoom the conference room for which to retrieve available slots
+     * @return a list of available slots for the specified date and conference room
+     */
+    public List<Slot> getFreeSlots(LocalDate date, ConferenceRoom conferenceRoom) {
+        List<Slot> freeSlots = new ArrayList<>();
+
+        // Define the start and end time for the day
+        LocalDateTime startOfDay = date.atTime(LocalTime.of(9, 0));  // Assume booking starts at 9 AM
+        LocalDateTime endOfDay = date.atTime(LocalTime.of(18, 0));   // Assume booking ends at 6 PM
+
+        // Initialize the current start time to the beginning of the day
+        LocalDateTime currentStartTime = startOfDay;
+
+        // Sort existing bookings for the given date and conference room
+        List<Booking> bookingsForDate = new ArrayList<>();
+        for (Booking booking : bookings.values()) {
+            if (booking.getStartTime().toLocalDate().equals(date) && booking.getResource() instanceof ConferenceRoom &&
+                    ((ConferenceRoom) booking.getResource()).equals(conferenceRoom)) {
+                bookingsForDate.add(booking);
+            }
+        }
+        bookingsForDate.sort((b1, b2) -> b1.getStartTime().compareTo(b2.getStartTime()));
+
+        // Iterate through the sorted bookings to find free slots
+        for (Booking booking : bookingsForDate) {
+            LocalDateTime bookingStartTime = booking.getStartTime();
+            if (currentStartTime.isBefore(bookingStartTime)) {
+                freeSlots.add(new Slot(currentStartTime, bookingStartTime));
+            }
+            currentStartTime = booking.getEndTime();
+        }
+
+        // Check for a free slot between the last booking end time and the end of the day
+        if (currentStartTime.isBefore(endOfDay)) {
+            freeSlots.add(new Slot(currentStartTime, endOfDay));
+        }
+
+        return freeSlots;
+    }
+
+
+
+    /**
+     * Gets the next available booking ID.
+     *
+     * @return the next available booking ID
+     */
+    public long getNextBookingId() {
+        return bookings.isEmpty() ? 1 : Collections.max(bookings.keySet()) + 1;
+    }
+
+    public void deleteBooking(long id) {
+        if (!bookings.containsKey(id)) {
+            throw new IllegalArgumentException("Booking with id " + id + " not found");
+        }
+        bookings.remove(id);
     }
 }

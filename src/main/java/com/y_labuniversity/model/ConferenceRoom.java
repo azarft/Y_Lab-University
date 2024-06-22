@@ -23,7 +23,7 @@ import lombok.*;
  * <pre>{@code
  * ConferenceRoom conferenceRoom = ConferenceRoom.builder()
  *                 .id(1)
- *                 .name("Main Conference Room")
+ *                 .name("ConsoleApplication Conference Room")
  *                 .capacity(20)
  *                 .build();
  * }</pre>

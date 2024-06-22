@@ -2,6 +2,7 @@ package com.y_labuniversity.model;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -46,4 +47,8 @@ public class Booking {
     private Object resource; // can be Workspace or ConferenceRoom
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+
+    public LocalDate getDate() {
+        return startTime.toLocalDate();
+    }
 }

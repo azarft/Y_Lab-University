@@ -27,13 +27,9 @@ public class UserRepository {
      * Retrieves a user by their username.
      *
      * @param username the username of the user to retrieve
-     * @return the user with the specified username
-     * @throws IllegalArgumentException if the user is not found
+     * @return the user with the specified username, or null if not found
      */
     public User getUserByUsername(String username) {
-        if (!users.containsKey(username)) {
-            throw new IllegalArgumentException("User " + username + " not found");
-        }
         return users.get(username);
     }
 
@@ -74,6 +70,8 @@ public class UserRepository {
         if (!users.containsKey(username)) {
             throw new IllegalArgumentException("User not found");
         }
+        deleteUser(username);
         users.put(user.getUsername(), user);
     }
+
 }
